@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        # Portfolio Service routes
+        - id: portfolio-service
+          uri: http://${PORTFOLIO_SERVICE_HOST:localhost}:${PORTFOLIO_SERVICE_PORT:8081}
+          predicates:
+            - Path=/api/v1/transactions, /api/v1/transactions/**, /api/v1/portfolio/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: portfolioCircuitBreaker
+                fallbackUri: forward:/fallback/portfolio
+
+        # Portfolio Service Swagger
+        - id: portfolio-swagger
+          uri: http://${PORTFOLIO_SERVICE_HOST:localhost}:${PORTFOLIO_SERVICE_PORT:8081}
+          predicates:
+            - Path=/portfolio/swagger-ui/**, /portfolio/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        # Notification Service Swagger
+        - id: notification-swagger
+          uri: http://${NOTIFICATION_SERVICE_HOST:localhost}:${NOTIFICATION_SERVICE_PORT:8082}
+          predicates:
+            - Path=/notification/swagger-ui/**, /notification/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    gateway:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    com.portfolio: DEBUG
+    org.springframework.cloud.gateway: INFO

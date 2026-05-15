@@ -59,11 +59,13 @@ public class RabbitMQConfig {
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
-            MessageConverter jsonMessageConverter) {
+            MessageConverter jsonMessageConverter,
+            RabbitCorrelationInterceptor correlationInterceptor) {
 
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(jsonMessageConverter);
+        factory.setAfterReceivePostProcessors(correlationInterceptor);
         factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
         factory.setPrefetchCount(10);
         return factory;

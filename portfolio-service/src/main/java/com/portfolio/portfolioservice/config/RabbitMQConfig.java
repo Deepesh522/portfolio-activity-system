@@ -59,9 +59,11 @@ public class RabbitMQConfig {
 
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
-            MessageConverter jsonMessageConverter) {
+            MessageConverter jsonMessageConverter,
+            RabbitCorrelationPostProcessor correlationPostProcessor) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(jsonMessageConverter);
+        template.addBeforePublishPostProcessors(correlationPostProcessor);
         return template;
     }
 }
