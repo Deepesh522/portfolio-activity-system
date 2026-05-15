@@ -60,3 +60,17 @@ logging:
   level:
     com.portfolio: DEBUG
     org.springframework.cloud.gateway: INFO
+
+resilience4j:
+  timelimiter:
+    instances:
+      portfolioCircuitBreaker:
+        timeoutDuration: 5s
+  circuitbreaker:
+    instances:
+      portfolioCircuitBreaker:
+        minimumNumberOfCalls: 5
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
